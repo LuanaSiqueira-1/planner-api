@@ -27,6 +27,22 @@ class LembreteController extends Controller
         ]);
     }
 
+    public function proximos(Request $request): JsonResponse
+{
+    $lembretes = $request->user()
+        ->lembretes()
+        ->with('categoria')
+        ->where('ativo', true)
+        ->where('data_hora', '>=', now())
+        ->orderBy('data_hora')
+        ->orderBy('id')
+        ->get();
+
+    return response()->json([
+        'data' => LembreteResource::collection($lembretes)->resolve(),
+    ]);
+}
+
     public function store(StoreLembreteRequest $request): JsonResponse
     {
         $dados = $request->validated();

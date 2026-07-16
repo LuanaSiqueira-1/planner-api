@@ -14,6 +14,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/perfil', [AuthController::class, 'meuPerfil']);
 
+    Route::get('/lembretes/proximos', [LembreteController::class, 'proximos']);
+
     Route::apiResource('lembretes', LembreteController::class);
     Route::apiResource('metas', MetaController::class);
     Route::apiResource('categorias', CategoriaController::class);
