@@ -18,28 +18,49 @@ class TarefaController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'categoria_id' => 'nullable|integer|exists:categorias,id',
-            'descricao' => 'required|string|max:255',
-            'status' => 'sometimes|in:CUMPRIDA,PARCIAL,NAO_CUMPRIDA',
-            'data' => 'required|date',
-            'hora_inicio' => 'required|date_format:H:i',
-            'hora_fim' => 'required|date_format:H:i|after:hora_inicio',
-            'turno' => 'required|in:MANHA,TARDE,NOITE',
-            'prioridade' => 'required|in:ALTA,MEDIA,BAIXA',
-        ]);
+        $dados = $request->validate(
+            [
+                'categoria_id' => ['nullable', 'integer', 'exists:categorias,id'],
+                'descricao' => ['required', 'string', 'max:255'],
+                'status' => ['sometimes', 'in:CUMPRIDA,PARCIAL,NAO_CUMPRIDA'],
+                'data' => ['required', 'date'],
+                'hora_inicio' => ['bail', 'required', 'date_format:H:i'],
+                'hora_fim' => ['bail', 'required', 'date_format:H:i', 'after:hora_inicio'],
+                'turno' => ['required', 'in:MANHA,TARDE,NOITE'],
+                'prioridade' => ['required', 'in:ALTA,MEDIA,BAIXA'],
+            ],
+            [
+                'categoria_id.integer' => 'A categoria deve ser informada por um número inteiro.',
+                'categoria_id.exists' => 'A categoria informada não existe.',
 
-        $tarefa = Tarefa::create([
-            'usuario_id' => $request->user()->id,
-            'categoria_id' => $request->categoria_id,
-            'descricao' => $request->descricao,
-            'status' => $request->status ?? 'NAO_CUMPRIDA',
-            'data' => $request->data,
-            'hora_inicio' => $request->hora_inicio,
-            'hora_fim' => $request->hora_fim,
-            'turno' => $request->turno,
-            'prioridade' => $request->prioridade,
-        ]);
+                'descricao.required' => 'A descrição da tarefa é obrigatória.',
+                'descricao.string' => 'A descrição da tarefa deve ser um texto.',
+                'descricao.max' => 'A descrição da tarefa deve ter no máximo 255 caracteres.',
+
+                'status.in' => 'O status deve ser CUMPRIDA, PARCIAL ou NAO_CUMPRIDA.',
+
+                'data.required' => 'A data da tarefa é obrigatória.',
+                'data.date' => 'A data da tarefa deve ser uma data válida.',
+
+                'hora_inicio.required' => 'O horário de início é obrigatório.',
+                'hora_inicio.date_format' => 'O horário de início deve estar no formato HH:mm.',
+
+                'hora_fim.required' => 'O horário de término é obrigatório.',
+                'hora_fim.date_format' => 'O horário de término deve estar no formato HH:mm.',
+                'hora_fim.after' => 'O horário de término deve ser posterior ao horário de início.',
+
+                'turno.required' => 'O turno da tarefa é obrigatório.',
+                'turno.in' => 'O turno deve ser MANHA, TARDE ou NOITE.',
+
+                'prioridade.required' => 'A prioridade da tarefa é obrigatória.',
+                'prioridade.in' => 'A prioridade deve ser ALTA, MEDIA ou BAIXA.',
+            ]
+        );
+
+        $dados['usuario_id'] = $request->user()->id;
+        $dados['status'] = $dados['status'] ?? 'NAO_CUMPRIDA';
+
+        $tarefa = Tarefa::create($dados);
 
         $tarefa->load('categoria');
 
@@ -75,28 +96,62 @@ class TarefaController extends Controller
             ], 404);
         }
 
-       $request->validate([
-        'categoria_id' => 'sometimes|nullable|integer|exists:categorias,id',
-        'descricao' => 'sometimes|required|string|max:255',
-        'status' => 'sometimes|required|in:CUMPRIDA,PARCIAL,NAO_CUMPRIDA',
-        'data' => 'sometimes|required|date',
-        'hora_inicio' => 'sometimes|required_with:hora_fim|date_format:H:i',
-        'hora_fim' => 'sometimes|required_with:hora_inicio|date_format:H:i|after:hora_inicio',
-        'turno' => 'sometimes|required|in:MANHA,TARDE,NOITE',
-        'prioridade' => 'sometimes|required|in:ALTA,MEDIA,BAIXA',
-        ]);
+        if (!$request->hasAny([
+            'categoria_id',
+            'descricao',
+            'status',
+            'data',
+            'hora_inicio',
+            'hora_fim',
+            'turno',
+            'prioridade',
+        ])) {
+            return response()->json([
+                'message' => 'Informe ao menos um campo para atualizar.',
+            ], 422);
+        }
 
-$tarefa->update($request->only([
-    'categoria_id',
-    'descricao',
-    'status',
-    'data',
-    'hora_inicio',
-    'hora_fim',
-    'turno',
-    'prioridade',
-]));
+        $dados = $request->validate(
+            [
+                'categoria_id' => ['sometimes', 'nullable', 'integer', 'exists:categorias,id'],
+                'descricao' => ['sometimes', 'required', 'string', 'max:255'],
+                'status' => ['sometimes', 'required', 'in:CUMPRIDA,PARCIAL,NAO_CUMPRIDA'],
+                'data' => ['sometimes', 'required', 'date'],
+                'hora_inicio' => ['bail', 'sometimes', 'required_with:hora_fim', 'date_format:H:i'],
+                'hora_fim' => ['bail', 'sometimes', 'required_with:hora_inicio', 'date_format:H:i', 'after:hora_inicio'],
+                'turno' => ['sometimes', 'required', 'in:MANHA,TARDE,NOITE'],
+                'prioridade' => ['sometimes', 'required', 'in:ALTA,MEDIA,BAIXA'],
+            ],
+            [
+                'categoria_id.integer' => 'A categoria deve ser informada por um número inteiro.',
+                'categoria_id.exists' => 'A categoria informada não existe.',
 
+                'descricao.required' => 'A descrição da tarefa é obrigatória.',
+                'descricao.string' => 'A descrição da tarefa deve ser um texto.',
+                'descricao.max' => 'A descrição da tarefa deve ter no máximo 255 caracteres.',
+
+                'status.required' => 'O status da tarefa é obrigatório.',
+                'status.in' => 'O status deve ser CUMPRIDA, PARCIAL ou NAO_CUMPRIDA.',
+
+                'data.required' => 'A data da tarefa é obrigatória.',
+                'data.date' => 'A data da tarefa deve ser uma data válida.',
+
+                'hora_inicio.required_with' => 'O horário de início deve ser informado junto com o horário de término.',
+                'hora_inicio.date_format' => 'O horário de início deve estar no formato HH:mm.',
+
+                'hora_fim.required_with' => 'O horário de término deve ser informado junto com o horário de início.',
+                'hora_fim.date_format' => 'O horário de término deve estar no formato HH:mm.',
+                'hora_fim.after' => 'O horário de término deve ser posterior ao horário de início.',
+
+                'turno.required' => 'O turno da tarefa é obrigatório.',
+                'turno.in' => 'O turno deve ser MANHA, TARDE ou NOITE.',
+
+                'prioridade.required' => 'A prioridade da tarefa é obrigatória.',
+                'prioridade.in' => 'A prioridade deve ser ALTA, MEDIA ou BAIXA.',
+            ]
+        );
+
+        $tarefa->update($dados);
         $tarefa->load('categoria');
 
         return response()->json([
