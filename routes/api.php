@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\MetaController;
+use App\Http\Controllers\Api\TarefaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\LembreteController;
@@ -16,4 +17,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('lembretes', LembreteController::class);
     Route::apiResource('metas', MetaController::class);
     Route::apiResource('categorias', CategoriaController::class);
+    Route::apiResource('tarefas', TarefaController::class);
 });
