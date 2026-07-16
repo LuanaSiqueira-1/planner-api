@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TarefaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoriaController;
 use Illuminate\Support\Facades\Route;
@@ -13,5 +14,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/perfil', [AuthController::class, 'meuPerfil']);
 
     Route::apiResource('categorias', CategoriaController::class);
+    Route::apiResource('tarefas', TarefaController::class);
 
 });
