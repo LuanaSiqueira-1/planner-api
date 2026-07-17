@@ -86,6 +86,65 @@ $tarefa->update($request->only([
         ], 200);
     }
 
+    public function buscarPorStatus(Request $request, string $status)
+{
+    $tarefas = Tarefa::with('categoria')
+        ->where('usuario_id', $request->user()->id)
+        ->where('status', $status)
+        ->get();
+
+    return response()->json($tarefas, 200);
+}
+
+    public function buscarPorCategoria(Request $request, string $id)
+{
+    $tarefas = Tarefa::with('categoria')
+        ->where('usuario_id', $request->user()->id)
+        ->where('categoria_id', $id)
+        ->get();
+
+    return response()->json($tarefas, 200);
+}
+
+    public function buscarPorPrioridade(Request $request, string $prioridade)
+{
+    $tarefas = Tarefa::with('categoria')
+        ->where('usuario_id', $request->user()->id)
+        ->where('prioridade', $prioridade)
+        ->get();
+
+    return response()->json($tarefas, 200);
+}
+
+    public function buscarPorData(Request $request, string $data)
+{
+    $tarefas = Tarefa::with('categoria')
+        ->where('usuario_id', $request->user()->id)
+        ->where('data', $data)
+        ->get();
+
+    return response()->json($tarefas, 200);
+}
+
+    public function buscarPorTurno(Request $request, string $turno)
+{
+    $tarefas = Tarefa::with('categoria')
+        ->where('usuario_id', $request->user()->id)
+        ->where('turno', $turno)
+        ->get();
+
+    return response()->json($tarefas, 200);
+}
+
+    public function buscarPorUsuario(string $id)
+{
+    $tarefas = Tarefa::with('categoria')
+        ->where('usuario_id', $id)
+        ->get();
+
+    return response()->json($tarefas, 200);
+}
+
     public function destroy(Request $request, string $id)
     {
         $tarefa = Tarefa::where('usuario_id', $request->user()->id)

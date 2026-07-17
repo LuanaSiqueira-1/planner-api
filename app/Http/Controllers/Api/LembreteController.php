@@ -43,6 +43,53 @@ class LembreteController extends Controller
     ]);
 }
 
+    public function ativos(Request $request): JsonResponse
+{
+    $lembretes = $request->user()
+        ->lembretes()
+        ->with('categoria')
+        ->where('ativo', true)
+        ->orderBy('data_hora')
+        ->orderBy('id')
+        ->get();
+
+    return response()->json([
+        'data' => LembreteResource::collection($lembretes)->resolve(),
+    ]);
+}
+
+    public function recorrentes(Request $request): JsonResponse
+{
+    $lembretes = $request->user()
+        ->lembretes()
+        ->with('categoria')
+        ->where('recorrente', true)
+        ->orderBy('data_hora')
+        ->orderBy('id')
+        ->get();
+
+    return response()->json([
+        'data' => LembreteResource::collection($lembretes)->resolve(),
+    ]);
+}
+
+    public function buscarPorData(
+    Request $request,
+    string $data
+): JsonResponse {
+    $lembretes = $request->user()
+        ->lembretes()
+        ->with('categoria')
+        ->whereDate('data_hora', $data)
+        ->orderBy('data_hora')
+        ->orderBy('id')
+        ->get();
+
+    return response()->json([
+        'data' => LembreteResource::collection($lembretes)->resolve(),
+    ]);
+}
+
     public function store(StoreLembreteRequest $request): JsonResponse
     {
         $dados = $request->validated();
@@ -103,6 +150,19 @@ class LembreteController extends Controller
             'message' => 'Lembrete excluído com sucesso.',
         ]);
     }
+
+    public function buscarPorUsuario(int $id): JsonResponse
+{
+    $lembretes = Lembrete::with('categoria')
+        ->where('usuario_id', $id)
+        ->orderBy('data_hora')
+        ->orderBy('id')
+        ->get();
+
+    return response()->json([
+        'data' => LembreteResource::collection($lembretes)->resolve(),
+    ]);
+}
 
     private function buscarLembreteDoUsuario(
         Request $request,

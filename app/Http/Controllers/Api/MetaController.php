@@ -86,6 +86,70 @@ public function index(Request $request): JsonResponse
         ]);
     }
 
+    public function buscarPorStatus(
+    Request $request,
+    string $status
+): JsonResponse {
+    $metas = $request->user()
+        ->metas()
+        ->with('categoria')
+        ->where('status', $status)
+        ->orderByDesc('data_inicio')
+        ->orderByDesc('id')
+        ->get();
+
+    return response()->json([
+        'data' => MetaResource::collection($metas)->resolve(),
+    ]);
+}
+
+    public function buscarPorCategoria(
+    Request $request,
+    string $id
+): JsonResponse {
+    $metas = $request->user()
+        ->metas()
+        ->with('categoria')
+        ->where('categoria_id', $id)
+        ->orderByDesc('data_inicio')
+        ->orderByDesc('id')
+        ->get();
+
+    return response()->json([
+        'data' => MetaResource::collection($metas)->resolve(),
+    ]);
+}
+
+    public function buscarPorPeriodo(
+    Request $request,
+    string $periodo
+): JsonResponse {
+    $metas = $request->user()
+        ->metas()
+        ->with('categoria')
+        ->where('periodo', $periodo)
+        ->orderByDesc('data_inicio')
+        ->orderByDesc('id')
+        ->get();
+
+    return response()->json([
+        'data' => MetaResource::collection($metas)->resolve(),
+    ]);
+}
+
+    public function buscarPorUsuario(int $id): JsonResponse
+{
+    $metas = Meta::with('categoria')
+        ->where('usuario_id', $id)
+        ->orderByDesc('data_inicio')
+        ->orderByDesc('id')
+        ->get();
+
+    return response()->json([
+        'data' => MetaResource::collection($metas)->resolve(),
+    ]);
+}
+
     private function buscarMetaDoUsuario(
         Request $request,
         int $id
