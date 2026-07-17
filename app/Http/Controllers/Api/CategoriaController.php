@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Categoria;
-use Illuminate\Http\Request;
-
+use App\Http\Requests\StoreCategoriaRequest;
+use App\Http\Requests\UpdateCategoriaRequest;
 class CategoriaController extends Controller
 {
     public function index()
@@ -15,12 +15,9 @@ class CategoriaController extends Controller
         return response()->json($categorias, 200);
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoriaRequest $request)
     {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'cor' => 'required|string|max:20',
-        ]);
+        
 
         $categoria = Categoria::create([
             'nome' => $request->nome,
@@ -46,8 +43,7 @@ class CategoriaController extends Controller
         return response()->json($categoria, 200);
     }
 
-    public function update(Request $request, string $id)
-    {
+public function update(UpdateCategoriaRequest $request, string $id)    {
         $categoria = Categoria::find($id);
 
         if (!$categoria) {
@@ -55,11 +51,6 @@ class CategoriaController extends Controller
                 'message' => 'Categoria não encontrada'
             ], 404);
         }
-
-        $request->validate([
-            'nome' => 'sometimes|required|string|max:255',
-            'cor' => 'sometimes|required|string|max:20',
-        ]);
 
         $categoria->update($request->only([
             'nome',
