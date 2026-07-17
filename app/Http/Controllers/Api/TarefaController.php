@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tarefa;
+use App\Http\Requests\StoreTarefaRequest;
+use App\Http\Requests\UpdateTarefaRequest;
 use Illuminate\Http\Request;
-
 class TarefaController extends Controller
 {
     public function index(Request $request)
@@ -17,18 +18,8 @@ class TarefaController extends Controller
         return response()->json($tarefas, 200);
     }
 
-    public function store(Request $request)
+    public function store(StoreTarefaRequest $request)
     {
-        $request->validate([
-            'categoria_id' => 'nullable|integer|exists:categorias,id',
-            'descricao' => 'required|string|max:255',
-            'status' => 'sometimes|in:CUMPRIDA,PARCIAL,NAO_CUMPRIDA',
-            'data' => 'required|date',
-            'hora_inicio' => 'required|date_format:H:i',
-            'hora_fim' => 'required|date_format:H:i|after:hora_inicio',
-            'turno' => 'required|in:MANHA,TARDE,NOITE',
-            'prioridade' => 'required|in:ALTA,MEDIA,BAIXA',
-        ]);
 
         $tarefa = Tarefa::create([
             'usuario_id' => $request->user()->id,
@@ -65,7 +56,7 @@ class TarefaController extends Controller
         return response()->json($tarefa, 200);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateTarefaRequest $request, string $id)
     {
         $tarefa = Tarefa::where('usuario_id', $request->user()->id)
             ->find($id);
@@ -75,17 +66,6 @@ class TarefaController extends Controller
                 'message' => 'Tarefa não encontrada',
             ], 404);
         }
-
-       $request->validate([
-        'categoria_id' => 'sometimes|nullable|integer|exists:categorias,id',
-        'descricao' => 'sometimes|required|string|max:255',
-        'status' => 'sometimes|required|in:CUMPRIDA,PARCIAL,NAO_CUMPRIDA',
-        'data' => 'sometimes|required|date',
-        'hora_inicio' => 'sometimes|required_with:hora_fim|date_format:H:i',
-        'hora_fim' => 'sometimes|required_with:hora_inicio|date_format:H:i|after:hora_inicio',
-        'turno' => 'sometimes|required|in:MANHA,TARDE,NOITE',
-        'prioridade' => 'sometimes|required|in:ALTA,MEDIA,BAIXA',
-        ]);
 
 $tarefa->update($request->only([
     'categoria_id',
